@@ -1,0 +1,14 @@
+---
+
+- name: read in vault init response from disk
+  become: yes
+  set_fact:
+    init_data: "{{ lookup('file', vault_init_file) }}"
+
+- name: set vault_token
+  set_fact:
+    vault_token: "{{ init_data['root_token'] }}"
+
+- fail: msg="unable to determine value for vault_token"
+  when: vault_token == ""
+

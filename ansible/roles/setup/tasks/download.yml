@@ -1,0 +1,25 @@
+---
+
+- name: install packages
+  become: yes
+  apt:
+    name: "{{ packages }}"
+    update_cache: no
+  vars:
+    packages:
+    - jq
+
+- name: download cfssl
+  become: yes
+  get_url:
+    url: https://pkg.cfssl.org/R1.2/cfssl_{{ cfssl_platform }}-amd64
+    dest: /usr/local/bin/cfssl
+    mode: 0755
+
+- name: download cfssljson
+  become: yes
+  get_url:
+    url: https://pkg.cfssl.org/R1.2/cfssljson_{{ cfssl_platform }}-amd64
+    dest: /usr/local/bin/cfssljson
+    mode: 0755
+

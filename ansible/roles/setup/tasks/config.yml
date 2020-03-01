@@ -1,0 +1,11 @@
+---
+
+- name: create vault server config
+  become: yes
+  copy:
+    src: vault.hcl
+    dest: "{{ vault_base }}/config/vault.hcl"
+    owner: "{{ vault_docker_uid }}"
+    group: "{{ vault_docker_gid }}"
+    mode: 0600
+

@@ -1,0 +1,14 @@
+---
+
+- name: install aptitude
+  become: yes
+  apt:
+    name: aptitude
+    update_cache: yes
+    force_apt_get: yes
+
+- include_tasks: download.yml
+- include_tasks: ca.yml
+- include_tasks: certs.yml
+- include_tasks: config.yml
+

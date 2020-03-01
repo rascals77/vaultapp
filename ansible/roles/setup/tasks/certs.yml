@@ -1,0 +1,46 @@
+---
+
+- name: create directories
+  become: yes
+  file:
+    path: "{{ vault_base }}/config/tls/certs"
+    mode: 0700
+    owner: "{{ vault_docker_uid }}"
+    group: "{{ vault_docker_gid }}"
+    state: directory
+
+- name: generate certificate configuration
+  become: yes
+  shell: |
+    cfssl print-defaults config | \
+    jq 'del(.signing.profiles) |
+      .CN = "vault-server" |
+      .signing.default.expiry="87600h" |
+      .signing.default.usages=["signing", "key encipherment", "server auth"] |
+      .key = {"algo":"rsa","size":2048}' \
+    > certs/server-cfssl.json
+  args:
+    chdir: "{{ vault_base }}/config/tls"
+    creates: "{{ vault_base }}/config/tls/certs/server-cfssl.json"
+
+- name: generate certficiate for Vault server
+  become: yes
+  shell: |
+    echo '{"key":{"algo":"rsa","size":2048}}' | \
+    cfssl gencert -ca=ca/vault-ca.pem -ca-key=ca/vault-ca-key.pem -config=certs/server-cfssl.json \
+    -hostname="127.0.0.1" - | \
+    cfssljson -bare certs/server
+  args:
+    chdir: "{{ vault_base }}/config/tls"
+    creates: "{{ vault_base }}/config/tls/certs/server.pem"
+
+- name: set cert ownership
+  become: yes
+  file:
+    path: "{{ vault_base }}/config/tls/certs/{{ item }}"
+    owner: "{{ vault_docker_uid }}"
+    group: "{{ vault_docker_gid }}"
+  with_items:
+    - server.pem
+    - server-key.pem
+

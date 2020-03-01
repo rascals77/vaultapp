@@ -1,0 +1,60 @@
+---
+
+- name: initialize vault
+  become: no
+  hashivault_init:
+    url: "{{ vault_url }}"
+    verify: no
+    secret_shares: 5
+    secret_threshold: 3
+  register: vault_init
+  delegate_to: localhost
+
+- name: get vault status
+  become: no
+  hashivault_status:
+    url: "{{ vault_url }}"
+    verify: no
+  register: vault_status
+  delegate_to: localhost
+
+- block:
+  - name: create init json response
+    set_fact:
+      init_data: "{{ init_data|default({}) | combine({
+                     'keys': vault_init['keys']|default([]),
+                     'keys_base64': vault_init['keys_base64']|default([]),
+                     'root_token': vault_init['root_token']|default('')
+                  }) }}"
+
+  - name: write keys to disk
+    become: yes
+    copy:
+      content: "{{ init_data }}\n"
+      dest: "{{ vault_init_file }}"
+      mode: 0600
+  when: vault_init.changed == true
+
+- name: get root token
+  include_role: { name: get-root-token }
+  when: vault_token == ""
+
+- name: unseal vault
+  become: no
+  hashivault_unseal:
+    url: "{{ vault_url }}"
+    verify: no
+    keys: "{{ init_data['keys']|join(' ') }}"
+  delegate_to: localhost
+  when: vault_status.status.sealed == true
+
+- name: enable file audit
+  become: no
+  hashivault_audit_enable:
+    token: "{{ vault_token }}"
+    url: "{{ vault_url }}"
+    verify: no
+    name: file
+    options:
+      path: "/vault/logs/audit.log"
+

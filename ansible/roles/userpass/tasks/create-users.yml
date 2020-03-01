@@ -1,0 +1,12 @@
+---
+
+- name: add {{ item.name }} to userpass auth
+  become: no
+  hashivault_userpass:
+    token: "{{ vault_token }}"
+    url: "{{ vault_url }}"
+    verify: no
+    name: "{{ item.name }}"
+    pass: "{{ item.password }}"
+    policies: only-revoke-self
+

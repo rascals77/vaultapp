@@ -1,0 +1,14 @@
+---
+
+vault_base: /root/vault
+vault_platform: linux
+vault_version: 1.3.2
+
+vault_tls_cert_file: "{{ vault_base }}/tls/certs/server.pem"
+vault_tls_key_file: "{{ vault_base }}/tls/certs/server-key.pem"
+
+cfssl_platform: linux
+
+vault_docker_uid: "100"
+vault_docker_gid: "1000"
+

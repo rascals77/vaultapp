@@ -1,0 +1,23 @@
+---
+
+- name: Vault using docker and TLS
+  hosts: all
+  connection: local
+  vars:
+    ansible_python_interpreter: /root/PY/bin/python3
+  roles:
+    - role: common
+      become: no
+    - role: setup
+      become: no
+    - role: start
+      become: no
+    - role: init
+      become: no
+    - role: userpass
+      become: no
+      vars:
+        users:
+         - name: user1
+           password: pass1
+

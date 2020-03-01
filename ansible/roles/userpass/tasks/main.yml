@@ -1,0 +1,32 @@
+---
+
+- name: get root token
+  include_role: { name: get-root-token }
+  when: vault_token == ""
+
+- name: create no-access policy
+  become: no
+  hashivault_policy_set:
+    token: "{{ vault_token }}"
+    url: "{{ vault_url }}"
+    verify: no
+    name: only-revoke-self
+    rules: |
+      path "auth/token/revoke-self" {
+        capabilities = ["update"]
+      }
+
+- name: enable userpass auth backend
+  become: no
+  hashivault_auth_method:
+    token: "{{ vault_token }}"
+    url: "{{ vault_url }}"
+    verify: no
+    method_type: userpass
+    mount_point: userpass
+
+- name: create users
+  include_tasks: create-users.yml
+  with_items:
+    - "{{ users }}"
+
