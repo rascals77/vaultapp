@@ -38,7 +38,7 @@ $ cd vaultapp
 2. Download the Vagrant file to this project directory:
 
 ```sh
-$ curl -O https://github.com/rascals77/vaultapp/Vagrantfile
+$ curl -O https://raw.githubusercontent.com/rascals77/vaultapp/master/Vagrantfile
 ```
 
 3. Create the virtual machine:
